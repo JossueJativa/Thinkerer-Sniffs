@@ -1,0 +1,4 @@
+/env/
+/facturas/
+/data/*.xlsx
+/__pycache__/
