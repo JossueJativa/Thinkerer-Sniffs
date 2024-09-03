@@ -1,96 +1,114 @@
-import json
-import msoffcrypto
-import pandas as pd
-from io import BytesIO
-from tkinter import messagebox
-import sys  # Import sys to use sys.exit()
+import sqlite3
+from sqlite3 import Error
 
-def load_config():
-    """Load configuration from a JSON file."""
-    with open('config.json') as f:
-        return json.load(f)
+def create_connection():
+    path_db = 'data/ventas.db'
 
-def is_password_protected(file_path, password):
-    """Check if the file is password-protected."""
     try:
-        decrypted_file = BytesIO()
-        with open(file_path, 'rb') as file:
-            office_file = msoffcrypto.OfficeFile(file)
-            office_file.load_key(password=password)
-            office_file.decrypt(decrypted_file)
-        decrypted_file.seek(0)
-        # Attempt to read the decrypted file
-        pd.read_excel(decrypted_file, engine='openpyxl')
-        return True
-    except Exception as e:
-        # Show error message and close the application
-        messagebox.showerror("Error", f"Password check failed: {e}")
-        sys.exit()  # Exit the application
-        return False  # This line will not be reached due to sys.exit()
-
-def read_protected_excel(file_path, password, sheet_name):
-    """Read a password-protected Excel file and return a specific sheet."""
-    decrypted_file = BytesIO()
-    try:
-        with open(file_path, 'rb') as file:
-            office_file = msoffcrypto.OfficeFile(file)
-            office_file.load_key(password=password)
-            office_file.decrypt(decrypted_file)
-        decrypted_file.seek(0)
-        return pd.read_excel(decrypted_file, engine='openpyxl', sheet_name=sheet_name)
-    except Exception as e:
-        raise ValueError(f"An error occurred while reading the Excel file: {e}")
-
-def getDataFile(sheetname):
-    """Get data from a specific sheet in a password-protected Excel file."""
-    filename = 'data/general.xlsx'
-    config = load_config()
-    password = config.get('password', None)
-    
-    if password is None:
-        messagebox.showerror("Error", "Password is not set in the configuration file 'config.json'.")
-        sys.exit()  # Exit the application
-
-    # Check if the file is password-protected
-    if not is_password_protected(filename, password):
-        messagebox.showerror("Error", "The file is not password-protected or the password is incorrect.")
-        sys.exit()  # Exit the application
-    
-    try:
-        df = read_protected_excel(filename, password, sheetname)
-        return df
-    except Exception as e:
-        messagebox.showerror("Error", f"An error occurred while reading the file: {e}")
+        connection = sqlite3.connect(path_db)
+        return connection
+    except sqlite3.Error as e:
+        print(e)
         return None
-
-def writeFile(sheetname, header, data):
-    """Write data to a specific sheet in a password-protected Excel file."""
-    filename = 'data/general.xlsx'
-    config = load_config()
-    password = config.get('password', None)
     
-    if password is None:
-        messagebox.showerror("Error", "Password is not set in the configuration file.")
-        sys.exit()  # Exit the application
-
-    if not is_password_protected(filename, password):
-        messagebox.showerror("Error", "The file is not password-protected or the password is incorrect.")
-        sys.exit()  # Exit the application
-
-    df = pd.DataFrame([data], columns=header)
-
+def create_table(connection, create_table_sql):
     try:
-        existing_df = getDataFile(sheetname)
-        if existing_df is not None:
-            df = pd.concat([existing_df, df], ignore_index=True)
-    except ValueError:
-        pass
+        c = connection.cursor()
+        c.execute(create_table_sql)
+    except Error as e:
+        print(e)
 
-    try:
-        with pd.ExcelWriter(filename, engine='openpyxl', mode='a', if_sheet_exists='overlay') as writer:
-            df.to_excel(writer, sheet_name=sheetname, index=False)
-    except FileNotFoundError:
-        with pd.ExcelWriter(filename, engine='openpyxl') as writer:
-            df.to_excel(writer, sheet_name=sheetname, index=False)
+def create_tables():
+    sql_create_users_table = """ CREATE TABLE IF NOT EXISTS users (
+                                        id integer PRIMARY KEY,
+                                        name text NOT NULL,
+                                        email text NOT NULL,
+                                        phone text NOT NULL,
+                                        identity_card text NOT NULL
+                                    ); """
+    
+    sql_create_products_table = """ CREATE TABLE IF NOT EXISTS products (
+                                        id integer PRIMARY KEY,
+                                        name text NOT NULL,
+                                        stock integer NOT NULL,
+                                        mensual_sales integer NOT NULL,
+                                        installation integer NOT NULL,
+                                        price integer NOT NULL
+                                    ); """
+    
+    sql_create_employee_table = """ CREATE TABLE IF NOT EXISTS employees (
+                                        id integer PRIMARY KEY,
+                                        name text NOT NULL,
+                                        email text NOT NULL,
+                                        phone text NOT NULL,
+                                        password text NOT NULL
+                                    ); """
+    
+    connection = create_connection()
+    if connection is not None:
+        create_table(connection, sql_create_users_table)
+        create_table(connection, sql_create_products_table)
+        create_table(connection, sql_create_employee_table)
+    else:
+        print("Error! No se pudo conectar a la base de datos")
 
-    return True
+def insert_user(User):
+    sql = ''' INSERT INTO users(name,email,phone,identity_card)
+              VALUES(?,?,?,?) '''
+    connection = create_connection()
+    cur = connection.cursor()
+    cur.execute(sql, User)
+    connection.commit()
+    return cur.lastrowid
+
+def insert_product(Product):
+    sql = ''' INSERT INTO products(name, stock, mensual_sales, installation, price)
+              VALUES(?,?,?,?,?) '''
+    connection = create_connection()
+    cur = connection.cursor()
+    cur.execute(sql, Product)
+    connection.commit()
+    return cur.lastrowid
+
+def insert_employee(Employee):
+    sql = ''' INSERT INTO employees(name,email,phone,password)
+              VALUES(?,?,?,?) '''
+    connection = create_connection()
+    cur = connection.cursor()
+    cur.execute(sql, Employee)
+    connection.commit()
+    return cur.lastrowid
+
+def read_table(table):
+    connection = create_connection()
+    cur = connection.cursor()
+    cur.execute(f"SELECT * FROM {table}")
+    rows = cur.fetchall()
+    return rows
+
+def read_table_by_condition(table, params, condition, value):
+    connection = create_connection()
+    cur = connection.cursor()
+    
+    cur.execute(f"SELECT {params} FROM {table} WHERE {condition} = ?", (value,))
+    rows = cur.fetchall()
+    return rows
+
+def read_table_by_id(table, id):
+    connection = create_connection()
+    cur = connection.cursor()
+    cur.execute(f"SELECT * FROM {table} WHERE id = {id}")
+    rows = cur.fetchall()
+    return rows
+
+def update_table(table, id, data):
+    connection = create_connection()
+    cur = connection.cursor()
+    cur.execute(f"UPDATE {table} SET {data} WHERE id = {id}")
+    connection.commit()
+
+def delete_table(table, id):
+    connection = create_connection()
+    cur = connection.cursor()
+    cur.execute(f"DELETE FROM {table} WHERE id = {id}")
+    connection.commit()

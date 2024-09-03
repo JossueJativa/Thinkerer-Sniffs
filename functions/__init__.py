@@ -1,2 +1,3 @@
-from .user import createUser
-from .product import createProduct
+from .user import *
+from .product import *
+from .authentication import *

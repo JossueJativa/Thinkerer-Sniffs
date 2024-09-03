@@ -1,53 +1,54 @@
+import customtkinter as ctk
 import tkinter as tk
-from tkinter import ttk
-from pages import create_home_page, create_products_page, create_users_page
+from pages import create_home_page, create_login_page, create_register_page, create_products_page, create_users_page
+from data.controllerData import create_tables
+from widgets import Colors
 
-def minimize_window():
-    root.iconify()
+class mainApp(ctk.CTk):
+    def __init__(self):
+        super().__init__()
+        self.title("Facturador Sniffs")
+        self.fullscreen = False
+        self.pages = {}
+        self.configure(bg=Colors.white)
 
-def toggle_fullscreen():
-    global fullscreen
-    fullscreen = not fullscreen
-    root.attributes('-fullscreen', fullscreen)
+        self.setup_window()
+        self.create_widgets()
+        self.show_frame("login")
+        
+    def setup_window(self):
+        logo_path = "img/logo.png"
+        self.iconphoto(False, tk.PhotoImage(file=logo_path))
+        self.resizable(False, False)
+        # self.update_idletasks()
+        # width = self.winfo_screenwidth()
+        # height = self.winfo_screenheight()
+        # self.geometry(f"{width}x{height}")
 
-def close_window():
-    root.destroy()
+        # self.update_idletasks()
+        # self.geometry(f"{width}x{height}+0+0")
 
-# Configuración principal de la ventana
-root = tk.Tk()
-root.title("Facturador Sniffs")
-root.geometry("1320x950")
+    
+    def create_widgets(self):
+        self.pages["login"] = create_login_page(self, self.show_frame)
+        self.pages["login"].grid(row=0, column=0, sticky="nsew")
+        self.pages["register"] = create_register_page(self, self.show_frame)
+        self.pages["register"].grid(row=0, column=0, sticky="nsew")
+        self.pages["home"] = create_home_page(self, self.show_frame)
+        self.pages["home"].grid(row=0, column=0, sticky="nsew")
+        self.pages["products"] = create_products_page(self, self.show_frame)
+        self.pages["products"].grid(row=0, column=0, sticky="nsew")
+        self.pages["users"] = create_users_page(self, self.show_frame)
+        self.pages["users"].grid(row=0, column=0, sticky="nsew")
 
-logo_path = "img/icono-logo_1.png"
-root.iconphoto(True, tk.PhotoImage(file=logo_path))
+    def show_frame(self, page_name):
+        for page, frame in self.pages.items():
+            if page == page_name:
+                frame.grid()
+            else:
+                frame.grid_remove()
 
-# Iniciar en pantalla completa
-fullscreen = True
-root.attributes('-fullscreen', fullscreen)
-
-# Crear un Frame para los botones de control de ventana
-title_bar = tk.Frame(root, bg="grey", relief="raised", bd=0)
-title_bar.pack(fill=tk.X)
-
-# Crear botón de cerrar
-btn_close = tk.Button(title_bar, text="X", command=close_window, bg="grey", fg="white", bd=0, padx=10, pady=5)
-btn_close.pack(side=tk.RIGHT)
-
-# Crear botón de reducir pantalla (cambiar entre pantalla completa y ventana)
-btn_toggle_fullscreen = tk.Button(title_bar, text="[]", command=toggle_fullscreen, bg="grey", fg="white", bd=0, padx=10, pady=5)
-btn_toggle_fullscreen.pack(side=tk.RIGHT, padx=5)
-
-# Crear botón de minimizar
-btn_minimize = tk.Button(title_bar, text="_", command=minimize_window, bg="grey", fg="white", bd=0, padx=10, pady=5)
-btn_minimize.pack(side=tk.RIGHT, padx=5)
-
-# Crear el widget Notebook
-notebook = ttk.Notebook(root)
-notebook.pack(fill="both", expand=True)
-
-# Agregar páginas al Notebook
-create_home_page(notebook)
-create_products_page(notebook)
-create_users_page(notebook)
-
-root.mainloop()
+if __name__ == "__main__":
+    create_tables()
+    app = mainApp()
+    app.mainloop()

@@ -1,4 +1,4 @@
-from data.controllerData import getDataFile
+from data.controllerData import read_table, insert_product, read_table_by_id, update_table, delete_table
 
 class Product:
     def __init__(self, id, name, stock, mensual_sales, installation, price):
@@ -10,29 +10,44 @@ class Product:
         self.price = price
 
     def getProduct(self):
-        return self.id, self.name, self.stock, self.mensual_sales, self.installation, self.price
+        product = {
+            "id": self.id,
+            "name": self.name,
+            "stock": self.stock,
+            "mensual_sales": self.mensual_sales,
+            "installation": self.installation,
+            "price": self.price
+        }
+        return product
     
     @staticmethod
-    def getAllProducts():
+    def getProducts():
         try:
-            products = getDataFile("Productos")
-            product_data = []
-            for index, product in products.iterrows():
-                product_data.append({
-                    'ID': product['ID'],
-                    'Nombre': product['Nombre'],
-                    'Stock': product['Stock'],
-                    'Ventas Mensuales': product['Ventas Mensuales'],
-                    'Instalación': product['Instalación'],
-                    'Precio': product['Precio']
-                })
-            return product_data
-        except Exception as e:
-            print(f"Error: {e}")
+            products = read_table("products")
+            return products
+        except:
             return []
-        
+    
     @staticmethod
-    def getProductByID(id):
-        products = Product.getAllProducts()
-        product = next((p for p in products if p['ID'] == id), None)
+    def getProductById(id):
+        product = read_table_by_id("products", id)
         return product
+    
+    @staticmethod
+    def getProductByName(name):
+        product = read_table("products", name)
+        return product
+    
+    @staticmethod
+    def createProduct(name, stock, mensual_sales, installation, price):
+        product = (name, stock, mensual_sales, installation, price)
+        product_id = insert_product(product)
+        return product_id
+    
+    @staticmethod
+    def updateProduct(id, data):
+        update_table("products", id, data)
+
+    @staticmethod
+    def deleteProduct(id):
+        delete_table("products", id)

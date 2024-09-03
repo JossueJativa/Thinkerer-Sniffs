@@ -1,95 +1,125 @@
-import tkinter as tk
-from tkinter import messagebox, ttk
-from functions import createProduct
+import customtkinter as ctk
+from tkinter import ttk, messagebox
+from widgets import Custom_Input, Custom_Label, Custom_Button, Colors
 from classes import Product
+from functions import create_product
 
-def create_products_page(notebook):
-    frame_products = tk.Frame(notebook)
-    notebook.add(frame_products, text="Crear Productos")
-    
-    # Variables for entries
-    var_id = tk.StringVar()
-    var_name = tk.StringVar()
-    var_stock = tk.StringVar()
-    var_mensual_sales = tk.StringVar()
-    var_installation = tk.StringVar()
-    var_price = tk.StringVar()
+class create_products_page(ctk.CTkFrame):
+    def __init__(self, parent, show_frame_callback):
+        super().__init__(parent)
+        self.show_frame = show_frame_callback
 
-    def add_product():
-        id = var_id.get()
-        name = var_name.get()
-        stock = var_stock.get()
-        mensual_sales = var_mensual_sales.get()
-        installation = var_installation.get()
-        price = var_price.get()
-        
-        if not id or not name or not stock or not mensual_sales or not installation or not price:
+        # Configure the size of the CTkFrame
+        width = 1200
+        height = 800
+        self.configure(
+            width=width,
+            height=height,
+        )
+
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_columnconfigure(1, weight=1)
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_rowconfigure(1, weight=1)
+
+        # Create a navbar frame
+        self.navbar_frame = ctk.CTkFrame(self, height=50, corner_radius=0)
+        self.navbar_frame.grid(row=0, column=0, columnspan=2, sticky="ew")
+
+        # Navbar buttons
+        self.button_billing = ctk.CTkButton(
+            self.navbar_frame, text="Facturación", command=lambda: self.show_frame("home"))
+        self.button_billing.grid(row=0, column=0, padx=10, pady=5)
+
+        self.button_create_user = ctk.CTkButton(
+            self.navbar_frame, text="Creación de usuarios", command=lambda: self.show_frame("users"))
+        self.button_create_user.grid(row=0, column=1, padx=10, pady=5)
+
+        self.button_product_list = ctk.CTkButton(
+            self.navbar_frame, text="Lista de productos", command=lambda: self.show_frame("products"))
+        self.button_product_list.grid(row=0, column=2, padx=10, pady=5)
+
+        self.var_name = ctk.StringVar()
+        self.var_stock = ctk.StringVar()
+        self.var_mensual_sales = ctk.StringVar()
+        self.var_installation = ctk.StringVar()
+        self.var_price = ctk.StringVar()
+
+        # Custom input and label configurations
+        self.custom_input = Custom_Input(
+            bg_color=Colors.white,
+            fg_color=Colors.black,
+            text_color=Colors.black,
+            width=300,
+            height=30,
+            border_radius=10
+        )
+
+        self.custom_label = Custom_Label(
+            text_color=Colors.white,
+            font=12
+        )
+
+        self.custom_button_add = Custom_Button(
+            text="Agregar Producto",
+            command=self.add_product,
+            fg_color=Colors.primary,
+            hover_color=Colors.success
+        )
+
+        # Create and place labels and entries
+        labels = ["Nombre", "Stock", "Ventas Mensuales", "Instalación", "Precio"]
+        vars = [self.var_name, self.var_stock, self.var_mensual_sales, self.var_installation, self.var_price]
+
+        for i, (label, var) in enumerate(zip(labels, vars)):
+            self.custom_label.create_label(self, text=label).grid(row=i+1, column=0, padx=10, pady=10)
+            self.custom_input.create_input(self, textvariable=var).grid(row=i+1, column=1, padx=10, pady=10)
+
+        # Create and place the button to add the product
+        self.add_button = self.custom_button_add.create_button(self)
+        self.add_button.grid(row=len(labels)+1, column=0, columnspan=2, pady=10)
+
+        # Create and place a table to display products using ttk.Treeview
+        columns = ("ID", "Nombre", "Stock", "Ventas Mensuales", "Instalación", "Precio")
+        self.table = ttk.Treeview(self, columns=columns, show="headings")
+        self.table.grid(row=len(labels)+2, column=0, columnspan=2, padx=10, pady=10)
+
+        for col in columns:
+            self.table.heading(col, text=col)
+
+        self.update_product_table()
+
+    def add_product(self):
+        name = self.var_name.get()
+        stock = self.var_stock.get()
+        mensual_sales = self.var_mensual_sales.get()
+        installation = self.var_installation.get()
+        price = self.var_price.get()
+
+        if not name or not stock or not mensual_sales or not installation or not price:
             messagebox.showwarning("Advertencia", "Todos los campos deben ser completados.")
             return
-        
-        success = createProduct(id, name, stock, mensual_sales, installation, price)
+
+        success = create_product(name, stock, mensual_sales, installation, price)
         if success:
-            update_product_table()
-            clear_entries()
+            self.update_product_table()
+            self.clear_entries()
             messagebox.showinfo("Éxito", "Producto agregado con éxito")
         else:
             messagebox.showerror("Error", "No se pudo agregar el producto.")
-    
-    def update_product_table():
-        # Clear the existing table rows
-        for row in table.get_children():
-            table.delete(row)
-        
+
+    def update_product_table(self):
+        for row in self.table.get_children():
+            self.table.delete(row)
+
         # Fetch products and update the table
-        products = Product.getAllProducts()
+        products = Product.getProducts()
         for product in products:
-            table.insert("", "end", values=(
-                product['ID'],
-                product['Nombre'],
-                product['Stock'],
-                product['Ventas Mensuales'],
-                product['Instalación'],
-                product['Precio']
-            ))
-    
-    def clear_entries():
-        var_id.set("")
-        var_name.set("")
-        var_stock.set("")
-        var_mensual_sales.set("")
-        var_installation.set("")
-        var_price.set("")
-    
-    # Layout for product entry fields
-    tk.Label(frame_products, text="ID:").grid(row=0, column=0, padx=10, pady=10)
-    tk.Entry(frame_products, textvariable=var_id).grid(row=0, column=1, padx=10, pady=10)
+            self.table.insert("", "end", values=product)  # Directly use the tuple values
 
-    tk.Label(frame_products, text="Nombre:").grid(row=1, column=0, padx=10, pady=10)
-    tk.Entry(frame_products, textvariable=var_name).grid(row=1, column=1, padx=10, pady=10)
-
-    tk.Label(frame_products, text="Stock:").grid(row=2, column=0, padx=10, pady=10)
-    tk.Entry(frame_products, textvariable=var_stock).grid(row=2, column=1, padx=10, pady=10)
-
-    tk.Label(frame_products, text="Ventas Mensuales:").grid(row=3, column=0, padx=10, pady=10)
-    tk.Entry(frame_products, textvariable=var_mensual_sales).grid(row=3, column=1, padx=10, pady=10)
-
-    tk.Label(frame_products, text="Instalación:").grid(row=4, column=0, padx=10, pady=10)
-    tk.Entry(frame_products, textvariable=var_installation).grid(row=4, column=1, padx=10, pady=10)
-
-    tk.Label(frame_products, text="Precio:").grid(row=5, column=0, padx=10, pady=10)
-    tk.Entry(frame_products, textvariable=var_price).grid(row=5, column=1, padx=10, pady=10)
-
-    # Create and place a button to add the product
-    btn_add_product = tk.Button(frame_products, text="Agregar Producto", command=add_product)
-    btn_add_product.grid(row=6, column=0, columnspan=2, pady=10)
-
-    # Create and place a table to display products
-    columns = ("ID", "Nombre", "Stock", "Ventas Mensuales", "Instalación", "Precio")
-    table = ttk.Treeview(frame_products, columns=columns, show="headings")
-    table.grid(row=7, column=0, columnspan=2, padx=10, pady=10)
-
-    for col in columns:
-        table.heading(col, text=col)
-
-    # Populate the table with existing products
-    update_product_table()
+    def clear_entries(self):
+        self.var_name.set("")
+        self.var_stock.set("")
+        self.var_mensual_sales.set("")
+        self.var_installation.set("")
+        self.var_price.set("")

@@ -1,75 +1,126 @@
-import tkinter as tk
-from tkinter import messagebox, ttk
-from functions import createUser
+import customtkinter as ctk
+from tkinter import ttk, messagebox
+from widgets import Custom_Input, Custom_Label, Custom_Button, Colors
+from functions import create_user
 from classes import User
 
-def create_users_page(notebook):
-    frame_users = tk.Frame(notebook)
-    notebook.add(frame_users, text="Crear Usuarios")
-    
-    # Variables for entries
-    var_nombre = tk.StringVar()
-    var_email = tk.StringVar()
-    var_celular = tk.StringVar()
-    var_cedula = tk.StringVar()
+class create_users_page(ctk.CTkFrame):
+    def __init__(self, parent, show_frame_callback):
+        super().__init__(parent)
+        self.show_frame = show_frame_callback
 
-    def add_user():
-        nombre = var_nombre.get()
-        email = var_email.get()
-        celular = var_celular.get()
-        cedula = var_cedula.get()
-        
+        # Configure the size of the CTkFrame
+        width = 1200
+        height = 800
+        self.configure(
+            width=width,
+            height=height,
+        )
+
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_columnconfigure(1, weight=1)
+        self.grid_columnconfigure(2, weight=1)
+        self.grid_columnconfigure(3, weight=1)
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_rowconfigure(1, weight=1)
+        self.grid_rowconfigure(2, weight=1)
+
+        # Create a navbar frame
+        self.navbar_frame = ctk.CTkFrame(self, height=50, corner_radius=0)
+        self.navbar_frame.grid(row=0, column=0, columnspan=4, sticky="ew")
+
+        # Navbar buttons
+        self.button_billing = ctk.CTkButton(
+            self.navbar_frame, text="Facturación", command=lambda: self.show_frame("home"))
+        self.button_billing.grid(row=0, column=0, padx=10, pady=5)
+
+        self.button_create_user = ctk.CTkButton(
+            self.navbar_frame, text="Creación de usuarios", command=lambda: self.show_frame("users"))
+        self.button_create_user.grid(row=0, column=1, padx=10, pady=5)
+
+        self.button_product_list = ctk.CTkButton(
+            self.navbar_frame, text="Lista de productos", command=lambda: self.show_frame("products"))
+        self.button_product_list.grid(row=0, column=2, padx=10, pady=5)
+
+        # Variables for entries
+        self.var_nombre = ctk.StringVar()
+        self.var_email = ctk.StringVar()
+        self.var_celular = ctk.StringVar()
+        self.var_cedula = ctk.StringVar()
+
+        # Custom input and label configurations
+        self.custom_input = Custom_Input(
+            bg_color=Colors.white,
+            fg_color=Colors.black,
+            text_color=Colors.black,
+            width=300,
+            height=30,
+            border_radius=10
+        )
+
+        self.custom_label = Custom_Label(
+            text_color=Colors.white,
+            font=12
+        )
+
+        self.custom_button_add = Custom_Button(
+            text="Agregar Usuario",
+            command=self.add_user,
+            fg_color=Colors.primary,
+            hover_color=Colors.success
+        )
+
+        # Create and place labels and entries
+        labels = ["Nombre", "Email", "Celular", "Cédula"]
+        vars = [self.var_nombre, self.var_email, self.var_celular, self.var_cedula]
+
+        for i, (label, var) in enumerate(zip(labels, vars)):
+            self.custom_label.create_label(self, text=label).grid(row=i+1, column=0, padx=10, pady=10)
+            self.custom_input.create_input(self, textvariable=var).grid(row=i+1, column=1, padx=10, pady=10)
+
+        # Create and place the button to add the user
+        self.add_button = self.custom_button_add.create_button(self)
+        self.add_button.grid(row=len(labels)+1, column=0, columnspan=2, pady=10)
+
+        # Create and place a table to display users using ttk.Treeview
+        columns = ("Nombre", "Email", "Celular", "Cédula")
+        self.table = ttk.Treeview(self, columns=columns, show="headings")
+        self.table.grid(row=len(labels)+2, column=0, columnspan=2, padx=10, pady=10)
+
+        for col in columns:
+            self.table.heading(col, text=col)
+
+        self.update_user_table()
+
+    def add_user(self):
+        nombre = self.var_nombre.get()
+        email = self.var_email.get()
+        celular = self.var_celular.get()
+        cedula = self.var_cedula.get()
+
         if not nombre or not email or not celular or not cedula:
             messagebox.showwarning("Advertencia", "Todos los campos deben ser completados.")
             return
-        
-        success = createUser(nombre, email, celular, cedula)
-        if success:
-            update_user_table()
-            clear_entries()
-            messagebox.showinfo("Éxito", "Usuario agregado con éxito")
+
+        user_id = create_user(nombre, email, celular, cedula)
+        if user_id:
+            messagebox.showinfo("Información", "Usuario agregado correctamente.")
+            self.update_user_table()
+            self.clear_entries()
         else:
             messagebox.showerror("Error", "No se pudo agregar el usuario.")
-    
-    def update_user_table():
-        # Clear the existing table rows
-        for row in table.get_children():
-            table.delete(row)
-        
-        # Fetch users and update the table
-        users = User.getAllUsers()
+
+    def update_user_table(self):
+        for row in self.table.get_children():
+            self.table.delete(row)
+
+        users = User.getUsers()
         for user in users:
-            table.insert("", "end", values=(user['Nombre'], user['Email'], user['Celular'], user['Cédula']))
-    
-    def clear_entries():
-        var_nombre.set("")
-        var_email.set("")
-        var_celular.set("")
-        var_cedula.set("")
-    
-    tk.Label(frame_users, text="Nombre:").grid(row=0, column=0, padx=10, pady=10)
-    tk.Entry(frame_users, textvariable=var_nombre).grid(row=0, column=1, padx=10, pady=10)
+            self.table.insert("", "end", values=user)
 
-    tk.Label(frame_users, text="Email:").grid(row=0, column=2, padx=10, pady=10)
-    tk.Entry(frame_users, textvariable=var_email).grid(row=0, column=3, padx=10, pady=10)
 
-    tk.Label(frame_users, text="Celular:").grid(row=1, column=0, padx=10, pady=10)
-    tk.Entry(frame_users, textvariable=var_celular).grid(row=1, column=1, padx=10, pady=10)
-
-    tk.Label(frame_users, text="Cédula:").grid(row=1, column=2, padx=10, pady=10)
-    tk.Entry(frame_users, textvariable=var_cedula).grid(row=1, column=3, padx=10, pady=10)
-
-    # Create and place the button to add a user
-    btn_add_user = tk.Button(frame_users, text="Agregar Usuario", command=add_user)
-    btn_add_user.grid(row=2, column=0, columnspan=4, pady=10)
-
-    # Create and place the table to display users
-    columns = ("Nombre", "Email", "Celular", "Cédula")
-    table = ttk.Treeview(frame_users, columns=columns, show="headings")
-    table.grid(row=3, column=0, columnspan=4, padx=10, pady=10)
-    
-    for col in columns:
-        table.heading(col, text=col)
-    
-    # Populate the table with existing users
-    update_user_table()
+    def clear_entries(self):
+        self.var_nombre.set("")
+        self.var_email.set("")
+        self.var_celular.set("")
+        self.var_cedula.set("")
