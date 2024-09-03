@@ -2,7 +2,6 @@ import tkinter as tk
 from PIL import Image, ImageTk
 import customtkinter as ctk
 from tkinter import messagebox
-
 from widgets import Custom_Input, Custom_Label, Custom_Button, Colors
 from classes import Employee
 
@@ -11,13 +10,10 @@ class create_login_page(ctk.CTkFrame):
         super().__init__(parent)
         self.show_frame = show_frame_callback
 
-        # Configurar el tamaño del CTkFrame
+        # Configure the size of the CTkFrame
         width = 1200
         height = 800
-        self.configure(
-            width=width,
-            height=height,
-        )
+        self.configure(width=width, height=height)
 
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(0, weight=1)
