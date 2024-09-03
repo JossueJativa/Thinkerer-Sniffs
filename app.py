@@ -27,7 +27,6 @@ class mainApp(ctk.CTk):
 
         # self.update_idletasks()
         # self.geometry(f"{width}x{height}+0+0")
-
     
     def create_widgets(self):
         self.pages["login"] = create_login_page(self, self.show_frame)

@@ -3,6 +3,7 @@ from tkinter import ttk, messagebox
 from widgets import Custom_Input, Custom_Label, Custom_Button, Colors
 from classes import Product
 from functions import create_product
+import ctypes
 
 class create_products_page(ctk.CTkFrame):
     def __init__(self, parent, show_frame_callback):
@@ -89,7 +90,18 @@ class create_products_page(ctk.CTkFrame):
 
         self.update_product_table()
 
+    def is_running_as_admin(self):
+        try:
+            return ctypes.windll.shell32.IsUserAnAdmin() != 0
+        except AttributeError:
+            # If the function is not available, it means the operating system is not Windows
+            return False
+
     def add_product(self):
+        if not self.is_running_as_admin():
+            messagebox.showwarning("Advertencia", "Este proceso requiere privilegios de administrador.")
+            return
+
         name = self.var_name.get()
         stock = self.var_stock.get()
         mensual_sales = self.var_mensual_sales.get()

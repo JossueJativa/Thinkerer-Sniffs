@@ -3,9 +3,9 @@ from PIL import Image, ImageTk
 import tkinter as tk
 from tkinter import messagebox
 from classes import Employee
-
 from functions.authentication import create_employee
 from widgets import Custom_Input, Custom_Label, Custom_Button, Colors
+import ctypes
 
 class create_register_page(ctk.CTkFrame):
     def __init__(self, parent, show_frame_callback):
@@ -103,7 +103,18 @@ class create_register_page(ctk.CTkFrame):
         self.login_button = self.custom_button_login.create_button(self)
         self.login_button.grid(row=6, column=1, pady=10)
 
+    def is_running_as_admin(self):
+        try:
+            return ctypes.windll.shell32.IsUserAnAdmin() != 0
+        except AttributeError:
+            # If the function is not available, it means the operating system is not Windows
+            return False
+
     def register_user(self):
+        if not self.is_running_as_admin():
+            messagebox.showwarning("Warning", "This operation requires administrator privileges.")
+            return
+
         name = self.username.get()
         email = self.email.get()
         phone = self.phone.get()
