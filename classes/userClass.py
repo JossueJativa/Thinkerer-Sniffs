@@ -1,4 +1,4 @@
-from data.controllerData import read_table, insert_user, read_table_by_id, update_table, delete_table
+from data.controllerData import read_table, insert_user, read_table_by_condition, read_table_by_id, update_table, delete_table
 
 class User:
     def __init__(self, id, name, email, phone, identity_card):
@@ -33,13 +33,41 @@ class User:
     
     @staticmethod
     def getUserByEmail(email):
-        user = read_table("users", email)
-        return user
+        try:
+            user = read_table_by_condition("users", "*", "email", email)
+            if user:
+                user_data = user[0]
+                user_dict = {
+                    "id": user_data[0],
+                    "name": user_data[1],
+                    "email": user_data[2],
+                    "phone": user_data[3],
+                    "identity_card": user_data[4]
+                }
+                return user_dict
+            else:
+                return None
+        except:
+            return None
     
     @staticmethod
     def getUserByName(name):
-        user = read_table("users", name)
-        return user
+        try:
+            user = read_table_by_condition("users", "*", "name", name)
+            if user:
+                user_data = user[0]
+                user_dict = {
+                    "id": user_data[0],
+                    "Nombre": user_data[1],
+                    "email": user_data[2],
+                    "Celular": user_data[3],
+                    "Cédula": user_data[4]
+                }
+                return user_dict
+            else:
+                return None
+        except:
+            return None
     
     @staticmethod
     def createUser(name, email, phone, identity_card):

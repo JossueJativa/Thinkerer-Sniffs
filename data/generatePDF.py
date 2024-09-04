@@ -4,16 +4,16 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.colors import HexColor
 from datetime import datetime
 import os
-from classes import User
+from functions import get_user_by_name
 from tkinter import messagebox
 
-def generate_pdf(user_id, selected_products_list, subtotal, iva, total, total_discount):
+def generate_pdf(userName, selected_products_list, subtotal, iva, total, total_discount=0):
     # Get current date and time for the unique code
     current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
     code = f"INV_{current_time}"
 
     # Get the complete user data
-    user = User.getUserByName(user_id)
+    user = get_user_by_name(userName)
     if not user:
         messagebox.showerror("Error", "No se pudo encontrar la información del cliente")
         return
@@ -33,7 +33,7 @@ def generate_pdf(user_id, selected_products_list, subtotal, iva, total, total_di
     gray_color = colors.HexColor("#A9A9A9")
 
     # Header Section
-    logo = "img/icono-logo_1.png"
+    logo = "img/logo.png"
     c.drawImage(logo, 60, 720, width=60, height=60, mask='auto')  # 'mask="auto"' makes the background transparent
 
     # Company Information
@@ -77,7 +77,7 @@ def generate_pdf(user_id, selected_products_list, subtotal, iva, total, total_di
     c.setFont("Helvetica-Bold", 10)
     c.setFillColor(primary_color)
     c.drawString(60, y_position, "Producto")
-    c.drawString(180, y_position, "Instalaciones")
+    c.drawString(180, y_position, "Cantidad")
     c.drawString(300, y_position, "Meses")
     c.drawString(400, y_position, "Precio Unitario")
     c.drawString(500, y_position, "Total")
@@ -88,7 +88,7 @@ def generate_pdf(user_id, selected_products_list, subtotal, iva, total, total_di
     c.setFillColor(colors.black)
     for product in selected_products_list:
         c.drawString(60, y_position, str(product['Nombre']))
-        c.drawString(180, y_position, str(product['Instalaciones']))
+        c.drawString(180, y_position, str(product['Cantidad']))
         c.drawString(300, y_position, str(product['Meses']))
         c.drawString(400, y_position, f"${product['Precio']:.2f}")
         c.drawString(500, y_position, f"${product['Total']:.2f}")

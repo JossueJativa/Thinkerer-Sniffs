@@ -10,7 +10,7 @@ class Custom_Input:
         self.border_radius = border_radius
 
     def create_input(self, parent, textvariable=None, show=None):
-        input = ctk.CTkEntry(
+        input_widget = ctk.CTkEntry(
             parent,
             placeholder_text="",
             textvariable=textvariable,
@@ -20,10 +20,10 @@ class Custom_Input:
             corner_radius=self.border_radius
         )
         
-        # Aplicar los colores
-        input.configure(
-            fg_color=self.bg_color,  # Fondo
-            text_color=self.text_color,  # Color del texto
+        # Apply colors
+        input_widget.configure(
+            fg_color=self.bg_color,
+            text_color=self.text_color
         )
 
-        return input
+        return input_widget
