@@ -20,13 +20,6 @@ class mainApp(ctk.CTk):
         logo_path = "img/logo.png"
         self.iconphoto(False, tk.PhotoImage(file=logo_path))
         self.resizable(False, False)
-        # self.update_idletasks()
-        # width = self.winfo_screenwidth()
-        # height = self.winfo_screenheight()
-        # self.geometry(f"{width}x{height}")
-
-        # self.update_idletasks()
-        # self.geometry(f"{width}x{height}+0+0")
     
     def create_widgets(self):
         self.pages["login"] = create_login_page(self, self.show_frame)

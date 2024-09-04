@@ -51,10 +51,10 @@ class create_home_page(ctk.CTkFrame):
 
         # Buttons for calculating total and generating PDF
         self.calculate_button = ctk.CTkButton(self, text="Calcular Total", command=self.calculate_totals)
-        self.calculate_button.grid(row=6, column=0, padx=10, pady=10)
+        self.calculate_button.grid(row=6, column=0, padx=10, pady=10, sticky="w")
 
         self.generate_pdf_button = ctk.CTkButton(self, text="Generar PDF", command=self.generate_pdf)
-        self.generate_pdf_button.grid(row=6, column=1, padx=10, pady=10)
+        self.generate_pdf_button.grid(row=6, column=1, padx=10, pady=10, sticky="w")
 
     def create_navbar_buttons(self):
         self.button_billing = ctk.CTkButton(self.navbar_frame, text="Facturación", command=lambda: self.show_frame("home"))
@@ -212,6 +212,5 @@ class create_home_page(ctk.CTkFrame):
         # Generar el PDF con la información de la factura
         try:
             generate_pdf(self.username, selected_products_list, subtotal, iva, total, total_discount)
-            messagebox.showinfo("Éxito", "PDF generado correctamente.")
         except Exception as e:
             messagebox.showerror("Error", f"No se pudo generar el PDF. {e}")
