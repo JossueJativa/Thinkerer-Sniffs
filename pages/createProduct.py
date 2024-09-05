@@ -40,13 +40,27 @@ class create_products_page(ctk.CTkFrame):
             self.navbar_frame, text="Lista de productos", command=lambda: self.show_frame("products"))
         self.button_product_list.grid(row=0, column=2, padx=10, pady=5)
 
+        # Add "Actualizar" button below "Editar Producto"
+        self.button_refresh = ctk.CTkButton(
+            self.navbar_frame, text="Actualizar", command=self.refresh_page)
+        self.button_refresh.grid(row=0, column=3, padx=10, pady=5)
+
+        # Move "Actualizar" button below "Editar Producto"
+        self.custom_button_edit = Custom_Button(
+            text="Editar Producto",
+            command=lambda: self.show_frame("editarProducto"),
+            fg_color=Colors.primary,
+            hover_color=Colors.warning
+        )
+        self.edit_button = self.custom_button_edit.create_button(self)
+        self.edit_button.grid(row=1, column=0, columnspan=2, pady=10)
+
         self.var_name = ctk.StringVar()
         self.var_stock = ctk.StringVar()
         self.var_mensual_sales = ctk.StringVar()
         self.var_installation = ctk.StringVar()
         self.var_price = ctk.StringVar()
 
-        # Custom input and label configurations
         self.custom_input = Custom_Input(
             bg_color=Colors.white,
             fg_color=Colors.black,
@@ -73,17 +87,17 @@ class create_products_page(ctk.CTkFrame):
         vars = [self.var_name, self.var_stock, self.var_mensual_sales, self.var_installation, self.var_price]
 
         for i, (label, var) in enumerate(zip(labels, vars)):
-            self.custom_label.create_label(self, text=label).grid(row=i+1, column=0, padx=10, pady=10)
-            self.custom_input.create_input(self, textvariable=var).grid(row=i+1, column=1, padx=10, pady=10)
+            self.custom_label.create_label(self, text=label).grid(row=i+3, column=0, padx=10, pady=10)
+            self.custom_input.create_input(self, textvariable=var).grid(row=i+3, column=1, padx=10, pady=10)
 
         # Create and place the button to add the product
         self.add_button = self.custom_button_add.create_button(self)
-        self.add_button.grid(row=len(labels)+1, column=0, columnspan=2, pady=10)
+        self.add_button.grid(row=len(labels)+3, column=0, columnspan=2, pady=10)
 
         # Create and place a table to display products using ttk.Treeview
         columns = ("ID", "Nombre", "Stock", "Ventas Mensuales", "Instalación", "Precio")
         self.table = ttk.Treeview(self, columns=columns, show="headings")
-        self.table.grid(row=len(labels)+2, column=0, columnspan=2, padx=10, pady=10)
+        self.table.grid(row=len(labels)+4, column=0, columnspan=2, padx=10, pady=10)
 
         for col in columns:
             self.table.heading(col, text=col)
@@ -135,3 +149,8 @@ class create_products_page(ctk.CTkFrame):
         self.var_mensual_sales.set("")
         self.var_installation.set("")
         self.var_price.set("")
+
+    def refresh_page(self):
+        self.update_product_table()
+        self.clear_entries()
+        messagebox.showinfo("Información", "Página actualizada con éxito.")

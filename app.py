@@ -1,6 +1,6 @@
 import customtkinter as ctk
 import tkinter as tk
-from pages import create_home_page, create_login_page, create_register_page, create_products_page, create_users_page
+from pages import create_home_page, create_login_page, create_register_page, create_products_page, create_users_page, edit_products_page, edit_users_page
 from data.controllerData import create_tables
 from widgets import Colors
 
@@ -32,6 +32,10 @@ class mainApp(ctk.CTk):
         self.pages["products"].grid(row=0, column=0, sticky="nsew")
         self.pages["users"] = create_users_page(self, self.show_frame)
         self.pages["users"].grid(row=0, column=0, sticky="nsew")
+        self.pages["editarProducto"] = edit_products_page(self, self.show_frame)
+        self.pages["editarProducto"].grid(row=0, column=0, sticky="nsew")
+        self.pages["editarUsuario"] = edit_users_page(self, self.show_frame)
+        self.pages["editarUsuario"].grid(row=0, column=0, sticky="nsew")
 
     def show_frame(self, page_name):
         for page, frame in self.pages.items():

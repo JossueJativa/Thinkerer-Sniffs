@@ -1,4 +1,4 @@
-from data.controllerData import read_table, insert_product, read_table_by_id, update_table, delete_table
+from data.controllerData import read_table, insert_product, read_table_by_id, update_table, delete_table, read_table_by_condition
 
 class Product:
     def __init__(self, id, name, stock, mensual_sales, installation, price):
@@ -35,8 +35,23 @@ class Product:
     
     @staticmethod
     def getProductByName(name):
-        product = read_table("products", name)
-        return product
+        try:
+            product = read_table_by_condition("products", "*", "name", name)
+            if product:
+                product_data = product[0]
+                product_dict = {
+                    "id": product_data[0],
+                    "name": product_data[1],
+                    "stock": product_data[2],
+                    "mensual_sales": product_data[3],
+                    "installation": product_data[4],
+                    "price": product_data[5]
+                }
+                return product_dict
+            else:
+                return None
+        except:
+            return None
     
     @staticmethod
     def createProduct(name, stock, mensual_sales, installation, price):

@@ -42,6 +42,20 @@ class create_users_page(ctk.CTkFrame):
             self.navbar_frame, text="Lista de productos", command=lambda: self.show_frame("products"))
         self.button_product_list.grid(row=0, column=2, padx=10, pady=5)
 
+        self.button_refresh = ctk.CTkButton(
+            self.navbar_frame, text="Actualizar", command=self.refresh_page)
+        self.button_refresh.grid(row=0, column=3, padx=10, pady=5)
+
+        # Move "Actualizar" button below "Editar Usuario"
+        self.custom_button_edit = Custom_Button(
+            text="Editar Usuario",
+            command=lambda: self.show_frame("editarUsuario"),
+            fg_color=Colors.primary,
+            hover_color=Colors.warning
+        )
+        self.edit_button = self.custom_button_edit.create_button(self)
+        self.edit_button.grid(row=1, column=0, columnspan=4, pady=10)
+
         # Variables for entries
         self.var_nombre = ctk.StringVar()
         self.var_email = ctk.StringVar()
@@ -75,17 +89,17 @@ class create_users_page(ctk.CTkFrame):
         vars = [self.var_nombre, self.var_email, self.var_celular, self.var_cedula]
 
         for i, (label, var) in enumerate(zip(labels, vars)):
-            self.custom_label.create_label(self, text=label).grid(row=i+1, column=0, padx=10, pady=10)
-            self.custom_input.create_input(self, textvariable=var).grid(row=i+1, column=1, padx=10, pady=10)
+            self.custom_label.create_label(self, text=label).grid(row=i+2, column=0, padx=10, pady=10)
+            self.custom_input.create_input(self, textvariable=var).grid(row=i+2, column=1, padx=10, pady=10)
 
         # Create and place the button to add the user
         self.add_button = self.custom_button_add.create_button(self)
-        self.add_button.grid(row=len(labels)+1, column=0, columnspan=2, pady=10)
+        self.add_button.grid(row=len(labels)+2, column=0, columnspan=2, pady=10)
 
         # Create and place a table to display users using ttk.Treeview
         columns = ("Nombre", "Email", "Celular", "Cédula")
         self.table = ttk.Treeview(self, columns=columns, show="headings")
-        self.table.grid(row=len(labels)+2, column=0, columnspan=2, padx=10, pady=10)
+        self.table.grid(row=len(labels)+3, column=0, columnspan=2, padx=10, pady=10)
 
         for col in columns:
             self.table.heading(col, text=col)
@@ -118,9 +132,14 @@ class create_users_page(ctk.CTkFrame):
         for user in users:
             self.table.insert("", "end", values=user)
 
-
     def clear_entries(self):
         self.var_nombre.set("")
         self.var_email.set("")
         self.var_celular.set("")
         self.var_cedula.set("")
+
+    def refresh_page(self):
+        """Function to refresh or reload the page"""
+        self.update_user_table()
+        self.clear_entries()
+        messagebox.showinfo("Información", "Página actualizada con éxito.")
