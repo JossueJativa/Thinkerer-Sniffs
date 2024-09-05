@@ -2,6 +2,5 @@
 /facturas/
 */facturas/
 /data/*.xlsx
-*/__pycache__/
 /dist/
 /build/
