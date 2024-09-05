@@ -97,7 +97,7 @@ class create_users_page(ctk.CTkFrame):
         self.add_button.grid(row=len(labels)+2, column=0, columnspan=2, pady=10)
 
         # Create and place a table to display users using ttk.Treeview
-        columns = ("Nombre", "Email", "Celular", "Cédula")
+        columns = ("id", "Nombre", "Email", "Celular", "Cédula")
         self.table = ttk.Treeview(self, columns=columns, show="headings")
         self.table.grid(row=len(labels)+3, column=0, columnspan=2, padx=10, pady=10)
 

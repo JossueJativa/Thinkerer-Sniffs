@@ -51,10 +51,10 @@ class create_home_page(ctk.CTkFrame):
 
         # Buttons for calculating total and generating PDF
         self.calculate_button = ctk.CTkButton(self, text="Calcular Total", command=self.calculate_totals)
-        self.calculate_button.grid(row=6, column=0, padx=10, pady=10, sticky="w")
+        self.calculate_button.grid(row=6, column=0, padx=10, pady=10, sticky="we")
 
         self.generate_pdf_button = ctk.CTkButton(self, text="Generar PDF", command=self.generate_pdf)
-        self.generate_pdf_button.grid(row=6, column=1, padx=10, pady=10, sticky="w")
+        self.generate_pdf_button.grid(row=7, column=0, padx=10, pady=10, sticky="we")
 
     def create_navbar_buttons(self):
         self.button_billing = ctk.CTkButton(self.navbar_frame, text="Facturación", command=lambda: self.show_frame("home"))

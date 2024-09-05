@@ -18,7 +18,7 @@ class edit_users_page(ctk.CTkFrame):
         self.var_name = ctk.StringVar()
         self.var_email = ctk.StringVar()
         self.var_phone = ctk.StringVar()
-        self.var_password = ctk.StringVar()
+        self.var_identity = ctk.StringVar()
         self.user_id = None
 
         self.users = [user[1] for user in get_users()]
@@ -26,8 +26,8 @@ class edit_users_page(ctk.CTkFrame):
         self.user_dropdown = ctk.CTkOptionMenu(self, values=self.users, variable=self.user_var, command=self.select_user)
         self.user_dropdown.grid(row=1, column=0, padx=10, pady=10)
 
-        labels = ["Nombre", "Email", "Teléfono", "Contraseña"]
-        vars = [self.var_name, self.var_email, self.var_phone, self.var_password]
+        labels = ["Nombre", "Email", "Celular", "Cédula"]
+        vars = [self.var_name, self.var_email, self.var_phone, self.var_identity]
 
         for i, (label, var) in enumerate(zip(labels, vars)):
             Custom_Label(
@@ -66,22 +66,22 @@ class edit_users_page(ctk.CTkFrame):
         user = get_user_by_name(selected_user_name)
         if user:
             self.user_id = user['id']
-            self.var_name.set(user['name'])
+            self.var_name.set(user['Nombre'])
             self.var_email.set(user['email'])
-            self.var_phone.set(user['phone'])
-            self.var_password.set(user['password'])
+            self.var_phone.set(user['Celular'])
+            self.var_identity.set(user['Cédula'])
 
     def save_changes(self):
         name = self.var_name.get()
         email = self.var_email.get()
         phone = self.var_phone.get()
-        password = self.var_password.get()
+        identity_card = self.var_identity.get()
 
-        if not name or not email or not phone or not password:
+        if not name or not email or not phone or not identity_card:
             messagebox.showwarning("Advertencia", "Todos los campos deben ser completados.")
             return
         
-        data = f"name = '{name}', email = '{email}', phone = '{phone}', password = '{password}'"
+        data = f"name = '{name}', email = '{email}', phone = '{phone}', identity_card = '{identity_card}'"
 
         try:
             update_user(self.user_id, data)
