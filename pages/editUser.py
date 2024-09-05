@@ -2,6 +2,7 @@ import customtkinter as ctk
 from tkinter import messagebox
 from widgets import Custom_Input, Custom_Label, Custom_Button, Colors
 from functions import update_user, get_users, get_user_by_name
+import ctypes
 
 class edit_users_page(ctk.CTkFrame):
     def __init__(self, parent, show_frame_callback):
@@ -93,7 +94,18 @@ class edit_users_page(ctk.CTkFrame):
                 self.var_phone.set(user['Celular'])
                 self.var_identity.set(user['Cédula'])
 
+    def is_running_as_admin(self):
+        try:
+            return ctypes.windll.shell32.IsUserAnAdmin() != 0
+        except AttributeError:
+            # If the function is not available, it means the operating system is not Windows
+            return False
+
     def save_changes(self):
+        if not self.is_running_as_admin():
+            messagebox.showwarning("Advertencia", "Este proceso requiere privilegios de administrador.")
+            return
+        
         name = self.var_name.get()
         email = self.var_email.get()
         phone = self.var_phone.get()
